@@ -4,7 +4,7 @@ from langchain import PromptTemplate, LLMChain
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import Chroma, FAISS
+from langchain.vectorstores import FAISS
 from langchain.chat_models import ChatOpenAI
 from templates import template_factory
 from tqdm import tqdm
@@ -15,7 +15,7 @@ load_dotenv()
 metaphor = Metaphor(os.environ.get("METAPHOR_API_KEY"))
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-class X:
+class TickerQuery:
     def __init__(self, ticker: str):
         self.ticker = ticker
         self.process_db()
@@ -36,7 +36,7 @@ class X:
             query, 
             use_autoprompt=True, 
             start_published_date=date,
-            num_results=5
+            num_results=10
             )
         return searches
     
@@ -54,7 +54,7 @@ class X:
     
     def embed_summaries(self):
         raw_docs = TextLoader(f"summaries/{self.ticker}.txt").load()
-        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+        text_splitter = CharacterTextSplitter(chunk_size=100, chunk_overlap=0)
         documents = text_splitter.split_documents(raw_docs)
         db = FAISS.from_documents(documents, OpenAIEmbeddings())
         return db
@@ -75,5 +75,12 @@ class X:
         docs = self.db.similarity_search(query)[0].page_content
         summary = self.generate(docs, "summarize_content_from_db")
         return summary
-
-
+    
+if __name__ == "__main__":
+    obj = TickerQuery("GE")
+    query = obj("What did management say Generative AI?")
+    print(query)
+    query = obj("How was revenue in this quarter for GE?")
+    print(query)
+    query = obj("What was their best earning segment?")
+    print(query)
