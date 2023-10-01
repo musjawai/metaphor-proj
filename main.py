@@ -75,8 +75,5 @@ class X:
         docs = self.db.similarity_search(query)[0].page_content
         summary = self.generate(docs, "summarize_content_from_db")
         return summary
-    
-if __name__ == "__main__":
-    obj = X("LEN")
-    print(obj("What did management say about future outlook?"))
+
 
